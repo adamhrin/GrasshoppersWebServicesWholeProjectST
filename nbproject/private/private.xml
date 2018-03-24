@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/web/WEB-INF/web.xml</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/User.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Services/SecurityFilter.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/InfoDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Training.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Brigade.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/LeaguesDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Services/RegisterLoginService.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/ComponentsDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Helpers/Evaluator.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/CustomException/CustomException.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Location.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Goal.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/GoalsDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/MatchesDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/TrainingsDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Services/UserService.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/AcceptedTrainingOptions.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Info.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Match.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/PositionsDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/LocationsDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/CategoriesDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Category.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/PlayersDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/BrigadesDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Helpers/PasswordEvaluator.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Component.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/League.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Services/GrasshoppersService.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Player.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Position.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/web/META-INF/context.xml</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Managers/DBManager.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/UserDao.java</file>
+        </group>
+    </open-files>
+</project-private>
