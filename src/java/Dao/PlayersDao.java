@@ -207,12 +207,17 @@ public class PlayersDao {
         DBManager db = new DBManager();
         Connection conn = db.getConnection();
         PreparedStatement psGetPlayer = null;
+        PreparedStatement psGetBrigadeHours = null;
         try {
             String playerQuery = "SELECT `id_player`, `firstname`, `nick`, `surname`, `email`, `number`, `id_admin_level` FROM `player` WHERE id_player = ?";
+            String numOfBrigadeHoursQuery = "SELECT sum(hours) as numOfHours FROM position JOIN brigade_position_player using (id_position) JOIN brigade using (id_brigade) WHERE id_player = ? and end_date_time < now() group by id_player";
             
             psGetPlayer = conn.prepareStatement(playerQuery);
+            psGetBrigadeHours = conn.prepareStatement(numOfBrigadeHoursQuery);
             psGetPlayer.setInt(1, id);
+            psGetBrigadeHours.setInt(1, id);
             ResultSet rPlayer = db.selectPreparedStatementQuery(psGetPlayer);
+            ResultSet rHours = db.selectPreparedStatementQuery(psGetBrigadeHours);
             while(rPlayer.next()) {
                 player = new Player();
                 player.setIdPlayer(id);
@@ -222,7 +227,9 @@ public class PlayersDao {
                 player.setEmail(rPlayer.getString("email"));
                 player.setNumber(rPlayer.getInt("number"));
                 player.setAdminLevel(rPlayer.getInt("id_admin_level"));
-                
+                while(rHours.next()) {
+                    player.setNumOfBrigadeHours(rHours.getInt("numOfHours"));
+                }
                 CategoriesDao categoriesDao = new CategoriesDao();
                 player.setCategories(categoriesDao.getCategoriesForPlayer(id, db, conn));
             }
@@ -346,5 +353,169 @@ public class PlayersDao {
             Logger.getLogger(PlayersDao.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+    }
+
+    public List<Player> getAllPlayers() throws CustomException {
+        DBManager db = new DBManager();
+        Connection conn = db.getConnection();
+        List<Player> playersList = null;
+        String getPlayersQuery = "SELECT id_player, firstname, nick, surname, email, number, id_admin_level " +
+                                 "FROM player " +
+                                 "ORDER BY number";
+        ResultSet rPlayers = db.selectQuery(conn, getPlayersQuery);
+        try {
+            playersList = new ArrayList<Player>();
+            while (rPlayers.next()) {
+                int idPlayer = rPlayers.getInt("id_player");
+                String firstname = rPlayers.getString("firstname");
+                String nick = rPlayers.getString("nick");
+                String surname = rPlayers.getString("surname");
+                String email = rPlayers.getString("email");
+                int number = rPlayers.getInt("number");
+                int adminLevel = rPlayers.getInt("id_admin_level");
+                
+                Player player = new Player();
+                player.setIdPlayer(idPlayer);
+                player.setFirstname(firstname);
+                player.setNick(nick);
+                player.setSurname(surname);
+                player.setEmail(email);
+                player.setNumber(number);
+                player.setAdminLevel(adminLevel);
+                playersList.add(player);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
+            throw new CustomException(CustomException.ERR_DATA_NOT_FOUND, ex.getMessage());
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(PlayersDao.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return playersList;
+    }
+
+    public void updatePlayersAdmin(List<Player> playersList) throws CustomException {
+        DBManager db = new DBManager();
+        Connection conn = db.getConnection();
+        String query = "UPDATE player SET id_admin_level = ? WHERE id_player = ?";
+        PreparedStatement psUpdatePlayers = null;
+        try {
+            psUpdatePlayers = conn.prepareStatement(query);
+            for (Player player : playersList) {
+                psUpdatePlayers.setInt(1, player.getAdminLevel());
+                psUpdatePlayers.setInt(2, player.getIdPlayer());
+                db.insertPreparedStatementQuery(psUpdatePlayers);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(PlayersDao.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+                if (psUpdatePlayers != null) {
+                    psUpdatePlayers.close();
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(PlayersDao.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    void updatePlayersForTraining(List<Category> toDeleteCategories, List<Category> toInsertCategories, List<Category> oldCategories, List<Category> newCategories, int idTraining, DBManager db, Connection conn) throws CustomException {
+        //DELETE
+        //osetrit ked je newCategories prazdne - vymazu sa vsetky riadky v player_on_training pre dany trening
+        //ked toDeleteCategories je prazdne - nic nevymazavam
+        
+        //INSERT
+        //ak je oldCategories prazdne, druhu cast selectu nepridavame do uvahy
+        //ked toInsert je prazdne - nic nepridavame
+        
+        //DELETE
+        String deletePlayersForTrainingQuery = "";
+        if (!toDeleteCategories.isEmpty()) {
+            if (!newCategories.isEmpty()) {
+                deletePlayersForTrainingQuery = "DELETE FROM player_on_training " +
+                                       "WHERE id_training = " + idTraining + " " +
+                                       "AND id_player IN (SELECT DISTINCT id_player " +
+                                       "		    FROM player_in_category " +
+                                       "                    WHERE id_category IN (";
+                for (Category toDeleteCategory : toDeleteCategories) {
+                    deletePlayersForTrainingQuery += toDeleteCategory.getId() + ",";
+                }
+                deletePlayersForTrainingQuery = deletePlayersForTrainingQuery.substring(0, deletePlayersForTrainingQuery.length() - 1);//odrezem poslednu ciarku
+                deletePlayersForTrainingQuery += ") ) " +
+                                        "AND id_player NOT IN (SELECT DISTINCT id_player " +
+                                        "		    	 FROM player_in_category" +
+                                        "		   	 WHERE id_category IN (";
+                for (Category newCategory : newCategories) {
+                    deletePlayersForTrainingQuery += newCategory.getId() + ",";
+                }
+                deletePlayersForTrainingQuery = deletePlayersForTrainingQuery.substring(0, deletePlayersForTrainingQuery.length() - 1);
+                deletePlayersForTrainingQuery += ") ) ";
+            } else {
+                deletePlayersForTrainingQuery = "DELETE FROM player_on_training WHERE id_training = " + idTraining;
+            }
+        }
+        
+        if (!deletePlayersForTrainingQuery.isEmpty()) {
+            db.deleteQuery(conn, deletePlayersForTrainingQuery);
+        }
+        
+        //INSERT
+        String selectPlayerForTrainingQuery = "";
+        if (!toInsertCategories.isEmpty()) {
+            //prva cast SELECTU
+            selectPlayerForTrainingQuery = "SELECT id_player FROM player " +
+                                   "WHERE id_player IN (SELECT DISTINCT id_player " +
+                                   "                      FROM player_in_category " +
+                                   "                      WHERE id_category IN (";
+            for (Category toInsertCategory : toInsertCategories) {
+                selectPlayerForTrainingQuery += toInsertCategory.getId() + ",";
+            }
+            selectPlayerForTrainingQuery = selectPlayerForTrainingQuery.substring(0, selectPlayerForTrainingQuery.length() - 1);
+            selectPlayerForTrainingQuery += ") ) ";
+            
+            //druha cast selectu
+            if (!oldCategories.isEmpty()) {
+                selectPlayerForTrainingQuery += "AND id_player NOT IN (SELECT DISTINCT id_player " +
+                                        "		    	 FROM player_in_category " +
+                                        "    			 WHERE id_category IN (";
+                for (Category oldCategory : oldCategories) {
+                    selectPlayerForTrainingQuery += oldCategory.getId() + ",";
+                }
+                selectPlayerForTrainingQuery = selectPlayerForTrainingQuery.substring(0, selectPlayerForTrainingQuery.length() - 1);
+                selectPlayerForTrainingQuery += ") ) ";
+            }
+        }
+        
+        if (!selectPlayerForTrainingQuery.isEmpty()) {
+            ResultSet rPlayers = db.selectQuery(conn, selectPlayerForTrainingQuery);
+            String insertTrainingsQuery = "INSERT INTO player_on_training (id_player, id_training) VALUES (?, ?)";
+            PreparedStatement psInsertTrainings = null;
+            try {
+                psInsertTrainings = conn.prepareStatement(insertTrainingsQuery);
+                psInsertTrainings.setInt(2, idTraining);
+                while(rPlayers.next()) {
+                    psInsertTrainings.setInt(1, rPlayers.getInt("id_player"));
+                    db.insertPreparedStatementQuery(psInsertTrainings);
+                }
+            } catch (SQLException ex) {
+                Logger.getLogger(TrainingsDao.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                try {
+                    if (psInsertTrainings != null) {
+                        psInsertTrainings.close();
+                    }
+                } catch (SQLException ex) {
+                    Logger.getLogger(TrainingsDao.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
     }
 }

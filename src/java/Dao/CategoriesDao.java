@@ -179,4 +179,52 @@ public class CategoriesDao extends ComponentsDao<Category> {
             }
         }
     }
+
+    void deleteCategoriesForTraining(List<Category> toDeleteCategories, int idTraining, DBManager db, Connection conn) throws CustomException {
+        PreparedStatement psDeleteCategory = null;
+        try {
+            String deleteCategoryQuery = "DELETE FROM category_on_training WHERE id_category = ? AND id_training = ?" ;
+            psDeleteCategory = conn.prepareStatement(deleteCategoryQuery);
+            psDeleteCategory.setInt(2, idTraining);
+            //deletne mi vsetky stare kategorie daneho playera, tie, ktore uz nesleduje
+            for (Category toDeleteCategory : toDeleteCategories) {
+                psDeleteCategory.setInt(1, toDeleteCategory.getId());
+                db.deletePreparedStatementQuery(psDeleteCategory);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CategoriesDao.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (psDeleteCategory != null) {
+                try {
+                    psDeleteCategory.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(CategoriesDao.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+
+    void insertCategoriesForTraining(List<Category> toInsertCategories, int idTraining, DBManager db, Connection conn) throws CustomException {
+        PreparedStatement psInsertCategory = null;
+        try {
+            String insertCategoryQuery = "INSERT INTO category_on_training (id_category, id_training) VALUES (?, ?)";
+            psInsertCategory = conn.prepareStatement(insertCategoryQuery);
+            psInsertCategory.setInt(2, idTraining);
+            //insertne vsetky nove kategorie playerovi, tie, ktore doteraz nesledoval
+            for (Category toInsertCategory : toInsertCategories) {
+                psInsertCategory.setInt(1, toInsertCategory.getId());
+                db.insertPreparedStatementQuery(psInsertCategory);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(CategoriesDao.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (psInsertCategory != null) {
+                try {
+                    psInsertCategory.close();
+                } catch (SQLException ex) {
+                    Logger.getLogger(CategoriesDao.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
 }

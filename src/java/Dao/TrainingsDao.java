@@ -325,4 +325,106 @@ public class TrainingsDao {
             }
         }
     }
+
+    public void updateTraining(Training newTraining) throws CustomException {
+        DBManager db = new DBManager();
+        Connection conn = db.getConnection();
+        int idTraining = newTraining.getIdTraining();
+        Training oldTraining = this.getTraining(idTraining);
+        List<Category> oldCategories = oldTraining.getCategories(); 
+        List<Category> newCategories = newTraining.getCategories(); 
+        
+        List<Category> toInsertCategories = new ArrayList<>();
+        List<Category> toDeleteCategories = new ArrayList<>();
+        
+        if (oldCategories != null && newCategories != null) {
+            for (Category oldCategory : oldCategories) {
+                if (!newCategories.contains(oldCategory)) {
+                    toDeleteCategories.add(oldCategory);
+                }
+            }
+            
+            for (Category newCategory : newCategories) {
+                if (!oldCategories.contains(newCategory)) {
+                    toInsertCategories.add(newCategory);
+                }
+            }
+        }
+        
+        String updateTrainingQuery = "UPDATE training SET id_location = ?, start_date_time = str_to_date(?, '%d.%m.%Y %H:%i'), end_date_time = str_to_date(?, '%d.%m.%Y %H:%i') WHERE id_training = ?";
+        
+        PreparedStatement psUpdateTraining = null;
+        try {
+            psUpdateTraining = conn.prepareStatement(updateTrainingQuery);
+            psUpdateTraining.setInt(1, newTraining.getLocation().getId());
+            psUpdateTraining.setString(2, newTraining.getStartDateTimeString());
+            psUpdateTraining.setString(3, newTraining.getEndDateTimeString());
+            psUpdateTraining.setInt(4, idTraining);
+            db.insertPreparedStatementQuery(psUpdateTraining);
+        } catch (SQLException ex) {
+            Logger.getLogger(PlayersDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        CategoriesDao categoriesDao = new CategoriesDao();
+        PlayersDao playersDao = new PlayersDao();
+        
+        //vymazanie a pridanie treningov podla kategorii ktore sa maju vymazat/pridat
+        playersDao.updatePlayersForTraining(toDeleteCategories, toInsertCategories, oldCategories, newCategories, idTraining, db, conn);
+                
+        //vymazanie a pridanie kategorii podla volby playera
+        categoriesDao.deleteCategoriesForTraining(toDeleteCategories, idTraining, db, conn);
+        categoriesDao.insertCategoriesForTraining(toInsertCategories, idTraining, db, conn);
+        
+        
+        try {
+            if (conn != null) {
+                conn.close();
+            }
+            if (psUpdateTraining != null) {
+                psUpdateTraining.close();
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(PlayersDao.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+
+    private Training getTraining(int idTraining) throws CustomException {
+        Training training = null;
+        DBManager db = new DBManager();
+        Connection conn = db.getConnection();
+        PreparedStatement psGetTraining = null;
+        try {
+            String trainingQuery = "SELECT id_training, id_location, start_date_time, end_date_time FROM training WHERE id_training = ?";
+            
+            psGetTraining = conn.prepareStatement(trainingQuery);
+            psGetTraining.setInt(1, idTraining);
+            ResultSet rTraining = db.selectPreparedStatementQuery(psGetTraining);
+            while(rTraining.next()) {
+                training = new Training();
+                training.setIdTraining(idTraining);
+                Location location = new Location();
+                location.setId(rTraining.getInt("id_location"));
+                training.setStartDateTimeString(rTraining.getString("start_date_time"));
+                training.setEndDateTimeString(rTraining.getString("end_date_time"));
+                
+                CategoriesDao categoriesDao = new CategoriesDao();
+                training.setCategories(categoriesDao.getCategoriesForTraining(idTraining, db, conn));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(PlayersDao.class.getName()).log(Level.SEVERE, null, ex);
+        } try {
+            if (psGetTraining != null) {
+                psGetTraining.close();
+            }
+            if (conn != null) {
+                conn.close();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(TrainingsDao.class.getName()).log(Level.SEVERE, null, ex);
+            throw new CustomException(CustomException.ERR_DB_ENTITY_CLOSE, ex.getMessage());
+        }
+        return training;
+    }
 }

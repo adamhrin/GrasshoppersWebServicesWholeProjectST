@@ -31,16 +31,16 @@ import Models.Match;
 import Models.Player;
 import Models.Position;
 import Models.Training;
+import com.fasterxml.jackson.core.type.TypeReference;
+import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET; 
-import static javax.ws.rs.HttpMethod.PUT;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path; 
@@ -67,6 +67,19 @@ public class GrasshoppersService {
     /**
      * GET
      */
+    
+    @GET
+    @Path("players")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response getPlayers(String json) {
+        Response response = null;
+        try {
+            response = Response.ok().entity(playersDao.getAllPlayers()).build();
+        } catch (CustomException ex) {
+            Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return response;
+    }
     
     @GET
     @Path("player/{id_player}")
@@ -211,21 +224,6 @@ public class GrasshoppersService {
         return response;
     }
     
-//    
-//    @GET 
-//    @Path("/brigades") 
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public List<Brigade> getBrigadesForPlayer(){ 
-//        return brigadesDao.getBrigadesForPlayer();
-//    }
-//    
-//    @GET 
-//    @Path("/brigades") 
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public List<Brigade> getBrigadesForPlayer(){ 
-//        return brigadesDao.getBrigadesForPlayer();
-//    }
-    
     
     
     
@@ -236,6 +234,29 @@ public class GrasshoppersService {
     /**
      * POST
      */
+    
+    @POST
+    @Path("player/login")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response loginPlayer(String json) {
+        Player player = null;
+        Player playerToReturn = null;
+        try {
+            player = (Player)this.mapObject(json, Player.class);
+            try {
+                playerToReturn = playersDao.loginPlayer(player);
+            } catch (CustomException ex) {
+                Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
+                if (ex.getErrorCode() == CustomException.ERR_BAD_LOGIN_DATA) {
+                    return Response.status(Response.Status.NOT_ACCEPTABLE).entity(ex).build();
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return Response.ok().entity(playerToReturn).build();
+    }
     
     @POST
     @Path("/training") 
@@ -433,6 +454,22 @@ public class GrasshoppersService {
      */
     
     @PUT
+    @Path("players")
+    @Consumes(MediaType.APPLICATION_JSON) 
+    public Response updatePlayersAdmin(String json) {
+        List<Player> playersList = null;
+        try {
+            playersList = (List<Player>)this.mapper.readValue(json, new TypeReference<List<Player>>(){});
+            playersDao.updatePlayersAdmin(playersList);
+        } catch (IOException ex) {
+            Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CustomException ex) {
+            Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return Response.ok().build();
+    }
+    
+    @PUT
     @Path("player")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updatePlayer(String json) {
@@ -466,6 +503,26 @@ public class GrasshoppersService {
             trainingsDao.updatePlayerOnTraining(idPlayer, idTraining, "b'0'");
         } catch (CustomException ex) {
             Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return Response.ok().build();
+    }
+    
+    @PUT
+    @Path("training")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateTraining(String json) {
+        Training training = null;
+        try {
+            training = (Training)mapObject(json, Training.class);
+            trainingsDao.updateTraining(training);
+        } catch (IOException ex) {
+            Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (CustomException ex) {
+            Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
+            //return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex).build();
+            if (ex.getErrorCode() == CustomException.ERR_UPDATE_INSERT) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex).build();
+            }
         }
         return Response.ok().build();
     }

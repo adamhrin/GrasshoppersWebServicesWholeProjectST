@@ -5,7 +5,6 @@
  */
 package Models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.List;
 
@@ -24,6 +23,7 @@ public class Player implements Serializable {
     private int adminLevel;
     private AcceptedTrainingOptions playerAcceptedTraining;
     private List<Category> categories;
+    private int numOfBrigadeHours;
 
     public int getIdPlayer() {
         return this.idPlayer;
@@ -104,5 +104,14 @@ public class Player implements Serializable {
     public void setAdminLevel(int adminLevel) {
         this.adminLevel = adminLevel;
     }
+
+    public int getNumOfBrigadeHours() {
+        return numOfBrigadeHours;
+    }
+
+    public void setNumOfBrigadeHours(int numOfBrigadeHours) {
+        this.numOfBrigadeHours = numOfBrigadeHours;
+    }
+    
     
 }
