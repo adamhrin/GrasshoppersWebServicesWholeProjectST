@@ -3,9 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/web/WEB-INF/web.xml</file>
             <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/User.java</file>
             <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Services/RegisterService.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/web/index.html</file>
             <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Services/SecurityFilter.java</file>
             <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/InfoDao.java</file>
             <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Training.java</file>
@@ -36,7 +36,9 @@
             <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Player.java</file>
             <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Models/Position.java</file>
             <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/web/META-INF/context.xml</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Helpers/MailHelper.java</file>
             <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Dao/UserDao.java</file>
+            <file>file:/D:/Pracovny/Skola/FRI/TRETIAK/Bakalarka/GrasshoppersWebServices/src/java/Managers/DBManager.java</file>
         </group>
     </open-files>
 </project-private>

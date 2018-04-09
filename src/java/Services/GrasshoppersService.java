@@ -235,36 +235,37 @@ public class GrasshoppersService {
      * POST
      */
     
-    @POST
-    @Path("player/login")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response loginPlayer(String json) {
-        Player player = null;
-        Player playerToReturn = null;
-        try {
-            player = (Player)this.mapObject(json, Player.class);
-            try {
-                playerToReturn = playersDao.loginPlayer(player);
-            } catch (CustomException ex) {
-                Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
-                if (ex.getErrorCode() == CustomException.ERR_BAD_LOGIN_DATA) {
-                    return Response.status(Response.Status.NOT_ACCEPTABLE).entity(ex).build();
-                }
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return Response.ok().entity(playerToReturn).build();
-    }
+//    @POST
+//    @Path("player/login")
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Response loginPlayer(String json) {
+//        Player player = null;
+//        Player playerToReturn = null;
+//        try {
+//            player = (Player)this.mapObject(json, Player.class);
+//            try {
+//                playerToReturn = playersDao.loginPlayer(player);
+//            } catch (CustomException ex) {
+//                Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
+//                if (ex.getErrorCode() == CustomException.ERR_BAD_LOGIN_DATA) {
+//                    return Response.status(Response.Status.NOT_ACCEPTABLE).entity(ex).build();
+//                }
+//            }
+//        } catch (IOException ex) {
+//            Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return Response.ok().entity(playerToReturn).build();
+//    }
     
     @POST
     @Path("/training") 
     @Consumes(MediaType.APPLICATION_JSON)
     public Response insertTraining(String json) { 
+        List<String> toEmailList = new ArrayList<>();
         try {
             Training t = (Training)mapObject(json, Training.class);
-            trainingsDao.insertTraining(t);
+            toEmailList = trainingsDao.insertTraining(t);
         } catch (Exception ex) {
             Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex).build();
@@ -273,7 +274,7 @@ public class GrasshoppersService {
 //            Logger.getLogger(GrasshoppersService.class.getName()).log(Level.SEVERE, null, ex);
 //            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(ex).build();
 //        }
-        return Response.ok().build();
+        return Response.ok().entity(toEmailList).build();
     }
     
     @POST

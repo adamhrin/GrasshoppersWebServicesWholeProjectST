@@ -6,10 +6,12 @@
 package Dao;
 
 import CustomException.CustomException;
+import Helpers.MailHelper;
 import Managers.DBManager;
 import Models.Brigade;
 import Models.League;
 import Models.Location;
+import Models.Player;
 import Models.Position;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -130,6 +132,18 @@ public class BrigadesDao {
                 psInsertPositionOnBrigade.setInt(2, position.getId());
                 db.insertPreparedStatementQuery(psInsertPositionOnBrigade);
             }
+            
+            PlayersDao playersDao = new PlayersDao();
+            List<Player> allPlayers = playersDao.getAllPlayers();
+            List<String> toEmailList = new ArrayList<>();
+            for (Player player : allPlayers) {
+                toEmailList.add(player.getEmail());
+            }
+            
+            String subject = MailHelper.NEW_BRIGADE;
+            String message = MailHelper.buildMessage(b.getStartDateTimeString(), b.getEndDateTimeString(), b.getLocation().getName());
+            MailHelper.sendEmail(toEmailList, subject, message);
+            
         } catch (SQLException ex) {
             Logger.getLogger(BrigadesDao.class.getName()).log(Level.SEVERE, null, ex);
         } finally {

@@ -105,14 +105,13 @@ public class MatchesDao {
         return matchesList;
     }
 
-    public List<Match> getMatchById(int idPlayer, int idMatch) throws CustomException {
-        List<Match> matchesList = new ArrayList<Match>();
+    public Match getMatchById(int idPlayer, int idMatch) throws CustomException {
         DBManager db = new DBManager();
         Connection conn = db.getConnection();
+        Match match = new Match();
         if (conn == null) {
-            Match unsuccessful = new Match();
-            unsuccessful.setIdMatch(-1);
-            matchesList.add(unsuccessful);
+            match = new Match();
+            match.setIdMatch(-1);
         } else {
             String allMatchesForPlayerQuery = "SELECT m.id_match as id_match, m.id_league as id_league, le.name as league_name, " +
                                             "m.id_location as id_location, lo.name as location_name, " +
@@ -126,7 +125,6 @@ public class MatchesDao {
             ResultSet rAllMatches = db.selectQuery(conn, allMatchesForPlayerQuery);
             try {
                 while (rAllMatches.next()) {
-                    Match match = new Match();
                     
                     match.setIdMatch(idMatch);
                     
@@ -166,7 +164,6 @@ public class MatchesDao {
                     match.setGrassGoals(goalsDao.getGrassGoalsForMatch(idMatch, idPlayer, db, conn));
                     match.setOpponentGoals(goalsDao.getOpponentGoalsForMatch(idMatch, idPlayer, db, conn));
                     
-                    matchesList.add(match);
                 }
             } catch (SQLException ex) {
                 throw new CustomException(CustomException.ERR_DATA_NOT_FOUND, ex.getMessage());
@@ -179,7 +176,7 @@ public class MatchesDao {
             Logger.getLogger(UserDao.class.getName()).log(Level.SEVERE, null, ex);
             throw new CustomException(CustomException.ERR_DB_ENTITY_CLOSE, ex.getMessage());
         }
-        return matchesList;
+        return match;
     }
 
     public void insertMatch(Match m) throws CustomException {

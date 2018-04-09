@@ -27,6 +27,7 @@ public class DBManager {
     {
         try {
             Class.forName("com.mysql.jdbc.Driver");
+            //Connection conn = DriverManager.getConnection("jdbc:mysql://10.130.24.235:3306/grassDb", "root", "root");
             //Connection conn = DriverManager.getConnection("jdbc:mysql://172.30.203.72:3306/grassDb", "root", "root");
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/grasshoppers", "root", "chester9397");
             return conn;

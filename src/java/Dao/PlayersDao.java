@@ -72,7 +72,7 @@ public class PlayersDao {
             unsuccessful.setIdPlayer(-1);
             playersForCategoryList.add(unsuccessful);
         } else {
-            String trainingsForPlayerQuery = "SELECT id_player, firstname, nick, surname, number " +
+            String trainingsForPlayerQuery = "SELECT id_player, firstname, nick, surname, email, number " +
                                              "FROM category join player_in_category using (id_category) join player using (id_player) " +
                                              "where id_category = " + idCategory + " " +
                                              "order by number";
@@ -84,6 +84,7 @@ public class PlayersDao {
                     String firstname = rPlayersForCategory.getString("firstname");
                     String nick = rPlayersForCategory.getString("nick");
                     String surname = rPlayersForCategory.getString("surname");
+                    String email = rPlayersForCategory.getString("email");
                     int number = rPlayersForCategory.getInt("number");
 
                     Player player = new Player();
@@ -91,6 +92,7 @@ public class PlayersDao {
                     player.setFirstname(firstname);
                     player.setNick(nick);
                     player.setSurname(surname);
+                    player.setEmail(email);
                     player.setNumber(number);
                     playersForCategoryList.add(player);
                 }
@@ -517,5 +519,26 @@ public class PlayersDao {
                 }
             }
         }
+    }
+
+    public List<Player> getPlayersInCategories(List<Category> categories, DBManager db, Connection conn) throws CustomException {
+        String playersInCategoryQuery = "SELECT DISTINCT id_player, email FROM player_in_category JOIN player USING (id_player) WHERE";
+        for (Category category : categories) {
+            playersInCategoryQuery += " id_category = " + category.getId() + " OR";
+        }
+        playersInCategoryQuery = playersInCategoryQuery.substring(0, playersInCategoryQuery.length() - 2);
+        ResultSet rPlayersInCategories = db.selectQuery(conn, playersInCategoryQuery);
+        List<Player> playersInCategories = new ArrayList<Player>();
+        try {
+            while(rPlayersInCategories.next()) {
+                Player p = new Player();
+                p.setIdPlayer(rPlayersInCategories.getInt("id_player"));
+                p.setEmail(rPlayersInCategories.getString("email"));
+                playersInCategories.add(p);
+            }
+        } catch (Exception ex) {
+            throw new CustomException(CustomException.ERR_DATA_NOT_FOUND, ex.getMessage());
+        } 
+        return playersInCategories;
     }
 }

@@ -7,6 +7,7 @@ package Dao;
 
 import CustomException.CustomException;
 import Helpers.Evaluator;
+import Helpers.MailHelper;
 import Managers.DBManager;
 import Models.AcceptedTrainingOptions;
 import Models.Category;
@@ -105,7 +106,7 @@ public class TrainingsDao {
         return trainingsList;
     }
 
-    public void insertTraining(Training t) throws CustomException, IOException {
+    public List<String> insertTraining(Training t) throws CustomException, IOException {
         
         FileHandler fh = new FileHandler("d:\\Pracovny\\Skola\\FRI\\TRETIAK\\Bakalarka\\GrasshoppersWebServices\\log.log");  
         logger.addHandler(fh);
@@ -148,7 +149,10 @@ public class TrainingsDao {
                 throw new CustomException(CustomException.ERR_DATA_NOT_FOUND, ex.getMessage());
             } 
             
-            String playersInCategoryQuery = "SELECT DISTINCT id_player FROM player_in_category WHERE";
+            PlayersDao playersDao = new PlayersDao();
+            List<Player> playersInCategories = playersDao.getPlayersInCategories(t.getCategories(), db, conn);
+            
+            //String playersInCategoryQuery = "SELECT DISTINCT id_player, email FROM player_in_category JOIN player USING (id_player) WHERE";
             //VKLADANIE DO CATEGORY_ON_TRAINING
             psInsertCategoryOnTraining = conn.prepareStatement(insertCategoryOnTraining);
             psInsertCategoryOnTraining.setInt(2, idTraining);
@@ -157,27 +161,38 @@ public class TrainingsDao {
                 db.insertPreparedStatementQuery(psInsertCategoryOnTraining);
                 
                 //PRE CAST VKLADANIE DO PLAYER_ON_TRAINING
-                playersInCategoryQuery += " id_category = " + category.getId() + " OR";
+                //playersInCategoryQuery += " id_category = " + category.getId() + " OR";
             }
             
             //VKLADANIE DO PLAYER_ON_TRAINING
-            playersInCategoryQuery = playersInCategoryQuery.substring(0, playersInCategoryQuery.length() - 2);
-            ResultSet rPlayersInCategories = db.selectQuery(conn, playersInCategoryQuery);
-            List<Integer> playersIdsInCategories = new ArrayList<Integer>();
-            try {
-                while(rPlayersInCategories.next()) {
-                    playersIdsInCategories.add(rPlayersInCategories.getInt("id_player"));
-                }
-            } catch (Exception ex) {
-                throw new CustomException(CustomException.ERR_DATA_NOT_FOUND, ex.getMessage());
-            } 
+            //playersInCategoryQuery = playersInCategoryQuery.substring(0, playersInCategoryQuery.length() - 2);
+            //ResultSet rPlayersInCategories = db.selectQuery(conn, playersInCategoryQuery);
+            //List<Player> playersInCategories = new ArrayList<Player>();
+//            try {
+//                while(rPlayersInCategories.next()) {
+//                    Player p = new Player();
+//                    p.setIdPlayer(rPlayersInCategories.getInt("id_player"));
+//                    p.setEmail(rPlayersInCategories.getString("email"));
+//                    playersInCategories.add(p);
+//                }
+//            } catch (Exception ex) {
+//                throw new CustomException(CustomException.ERR_DATA_NOT_FOUND, ex.getMessage());
+//            } 
             
             psInsertPlayerOnTraining = conn.prepareStatement(insertPlayerOnTraining);
             psInsertPlayerOnTraining.setInt(2, idTraining);
-            for (Integer id : playersIdsInCategories) {
-                psInsertPlayerOnTraining.setInt(1, id);
+            List<String> toEmailList = new ArrayList<>();
+            for (Player p : playersInCategories) {
+                psInsertPlayerOnTraining.setInt(1, p.getIdPlayer());
                 db.insertPreparedStatementQuery(psInsertPlayerOnTraining);
+                toEmailList.add(p.getEmail());
             }
+            
+            String subject = MailHelper.NEW_TRAINING;
+            String message = MailHelper.buildMessage(t.getStartDateTimeString(), t.getEndDateTimeString(), t.getLocation().getName());
+            MailHelper.sendEmail(toEmailList, subject, message);
+            return toEmailList;
+            
             
         } catch (Exception ex) {
             

@@ -7,6 +7,7 @@ package Dao;
 
 import CustomException.CustomException;
 import Helpers.Evaluator;
+import Helpers.MailHelper;
 import Managers.DBManager;
 import Models.Category;
 import Models.Info;
@@ -41,7 +42,7 @@ public class InfoDao {
                                         "join player_in_category pic on (ifc.id_category = pic.id_category) " +
                                         "where pic.id_player = " + idPlayer + " " +
                                         "group by i.id_info " +
-                                        "order by i.creation_date_time, i.last_update_date_time";
+                                        "order by case when i.last_update_date_time is null then i.creation_date_time else i.last_update_date_time end desc";
             ResultSet rInfoForPlayer = db.selectQuery(conn, infoForPlayerQuery);
             try {
                 while (rInfoForPlayer.next()) {
@@ -96,6 +97,8 @@ public class InfoDao {
         
         String getInfoIdQuery = "SELECT max(id_info) as max_id FROM info";
         
+        String getCreatorQuery = "SELECT firstname, nick, surname FROM player WHERE id_player = " + i.getCreator().getIdPlayer();
+        
         String insertInfoQuery = "INSERT INTO info (id_creator, content) " +
                                      "VALUES (?, ?)";
         PreparedStatement psInsertInfo = null;
@@ -103,6 +106,16 @@ public class InfoDao {
         String insertCategoryForInfo = "INSERT INTO info_for_category (id_info, id_category) VALUES (?, ?)";
         PreparedStatement psInsertCategoryForInfo = null;
         try {
+            ResultSet rCreator = db.selectQuery(conn, getCreatorQuery);
+            try {
+                while (rCreator.next()) {
+                    i.getCreator().setFirstname(rCreator.getString("firstname"));
+                    i.getCreator().setNick(rCreator.getString("nick"));
+                    i.getCreator().setSurname(rCreator.getString("surname"));
+                }
+            } catch (Exception ex) {
+                throw new CustomException(CustomException.ERR_DATA_NOT_FOUND, ex.getMessage());
+            } 
             psInsertInfo = conn.prepareStatement(insertInfoQuery);
             psInsertInfo.setInt(1, i.getCreator().getIdPlayer());
             psInsertInfo.setString(2, i.getContent());
@@ -120,10 +133,22 @@ public class InfoDao {
             
             psInsertCategoryForInfo = conn.prepareStatement(insertCategoryForInfo);
             psInsertCategoryForInfo.setInt(1, idInfo);
+            
             for (Category category : i.getCategories()) {
                 psInsertCategoryForInfo.setInt(2, category.getId());
                 db.insertPreparedStatementQuery(psInsertCategoryForInfo);
             }
+            PlayersDao playersDao = new PlayersDao();
+            List<Player> playersInCategories = new ArrayList<>();
+            List<String> toEmailList = new ArrayList<>();
+            playersInCategories = playersDao.getPlayersInCategories(i.getCategories(), db, conn);
+            for (Player player : playersInCategories) {
+                toEmailList.add(player.getEmail());
+            }
+            
+            String subject = MailHelper.NEW_INFO;
+            String message = MailHelper.buildInfoMessage(i.getCreator(), i.getContent());
+            MailHelper.sendEmail(toEmailList, subject, message);
             
         } catch (SQLException ex) {
             Logger.getLogger(InfoDao.class.getName()).log(Level.SEVERE, null, ex);
